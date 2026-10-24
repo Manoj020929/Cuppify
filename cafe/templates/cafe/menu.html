@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuppify - Menu</title>
+<style>
+  body { margin: 0; background: #ffffff; color: #2b2118; font-family: Arial, sans-serif; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-family: Georgia, serif; margin: 0; }
+  h2 { margin: 0 0 12px; font-size: 1.2rem; }
+  .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  a { color: #3f6b4f; }
+  .layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 720px) { .layout { grid-template-columns: 1.3fr 1fr; } }
+  .panel { border: 1px solid #e6dccd; border-radius: 10px; padding: 16px; }
+  .item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid #e6dccd; }
+  .item:last-child { border-bottom: 0; }
+  .price { color: #7a6a5c; font-size: 0.9rem; }
+  button { cursor: pointer; border: 1px solid #3f6b4f; background: #3f6b4f; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 0.95rem; }
+  button.light { background: transparent; color: #3f6b4f; }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .total { display: flex; justify-content: space-between; font-weight: bold; margin: 14px 0; }
+  .actions { display: flex; gap: 8px; }
+  .msg { margin-top: 12px; color: #3f6b4f; min-height: 1.2em; }
+  .empty { color: #7a6a5c; }
+  .past { border-top: 1px solid #e6dccd; padding: 10px 0; font-size: 0.9rem; }
+  .past small { color: #7a6a5c; }
+  .history { margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Cuppify</h1>
+    <span>Hi, {{ customer.name }} · <a href="{% url 'logout' %}">Logout</a></span>
+  </div>
+
+  {% if request.GET.ok %}
+    <p class="msg">Thanks for your order. Total: Rs {{ request.GET.ok }}. We will serve you soon.</p>
+  {% endif %}
+
+  <div class="layout">
+    <div class="panel">
+      <h2>Menu</h2>
+      {% for item in items %}
+        <div class="item">
+          <div>
+            <div>{{ item.name }}</div>
+            <div class="price">Rs {{ item.price }}</div>
+          </div>
+          <button class="add-btn" data-id="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ item.price }}">Add</button>
+        </div>
+      {% empty %}
+        <p class="empty">No items yet.</p>
+      {% endfor %}
+    </div>
+
+    <div class="panel">
+      <h2>Your order</h2>
+      <div id="orderList"></div>
+      <div class="total"><span>Total</span><span id="total">Rs 0</span></div>
+      <div class="actions">
+        <button id="placeBtn">Place order</button>
+        <button id="clearBtn" class="light">Clear</button>
+      </div>
+      <div class="msg" id="message"></div>
+    </div>
+  </div>
+
+  <div class="panel history">
+    <h2>Past orders</h2>
+    {% for order in orders %}
+      <div class="past">
+        <strong>Rs {{ order.total }}</strong> -
+        {% for line in order.items.all %}{{ line.name }} x {{ line.quantity }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        <br><small>{{ order.created_at }}</small>
+      </div>
+    {% empty %}
+      <p class="empty">No past orders yet.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  var cart = {};   // id -> { name, price, qty }
+  var orderList = document.getElementById("orderList");
+  var totalSpan = document.getElementById("total");
+  var message = document.getElementById("message");
+  var placeBtn = document.getElementById("placeBtn");
+
+  function showCart() {
+    orderList.innerHTML = "";
+    var total = 0;
+    var ids = Object.keys(cart);
+
+    if (ids.length === 0) {
+      var p = document.createElement("p");
+      p.className = "empty";
+      p.textContent = "No items yet. Add something from the menu.";
+      orderList.appendChild(p);
+    }
+
+    ids.forEach(function (id) {
+      var line = cart[id];
+      total += line.price * line.qty;
+
+      var row = document.createElement("div");
+      row.className = "item";
+      var label = document.createElement("span");
+      label.textContent = line.name + " x " + line.qty + " - Rs " + (line.price * line.qty);
+      var rm = document.createElement("button");
+      rm.className = "light";
+      rm.textContent = "Remove";
+      rm.onclick = function () {
+        line.qty -= 1;
+        if (line.qty <= 0) delete cart[id];
+        showCart();
+      };
+      row.appendChild(label);
+      row.appendChild(rm);
+      orderList.appendChild(row);
+    });
+
+    totalSpan.textContent = "Rs " + total;  // display only; the server recalculates
+  }
+
+  document.querySelectorAll(".add-btn").forEach(function (btn) {
+    btn.onclick = function () {
+      var id = btn.dataset.id;
+      if (!cart[id]) {
+        cart[id] = { name: btn.dataset.name, price: Number(btn.dataset.price), qty: 0 };
+      }
+      cart[id].qty += 1;
+      message.textContent = btn.dataset.name + " added to your order.";
+      showCart();
+    };
+  });
+
+  document.getElementById("clearBtn").onclick = function () {
+    cart = {};
+    message.textContent = "";
+    showCart();
+  };
+
+  placeBtn.onclick = async function () {
+    var items = Object.keys(cart).map(function (id) {
+      return { id: id, qty: cart[id].qty };
+    });
+    if (items.length === 0) {
+      message.textContent = "No item was selected.";
+      return;
+    }
+    placeBtn.disabled = true;
+    try {
+      var res = await fetch("{% url 'place_order' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+        body: JSON.stringify({ items: items })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Request failed");
+      window.location.href = "{% url 'menu' %}?ok=" + data.total;
+    } catch (err) {
+      message.textContent = "Could not place order: " + err.message;
+      placeBtn.disabled = false;
+    }
+  };
+
+  showCart();
+</script>
+</body>
+</html>

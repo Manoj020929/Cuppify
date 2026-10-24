@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuppify - Login</title>
+<style>
+  body { margin: 0; background: #ffffff; color: #2b2118; font-family: Arial, sans-serif; }
+  .box { max-width: 380px; margin: 60px auto; padding: 24px; border: 1px solid #e6dccd; border-radius: 10px; }
+  h1 { font-family: Georgia, serif; margin: 0 0 4px; }
+  p.sub { color: #7a6a5c; margin: 0 0 20px; }
+  label { display: block; margin: 12px 0 4px; font-size: 0.9rem; }
+  input { width: 100%; padding: 10px; border: 1px solid #e6dccd; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+  button { margin-top: 18px; width: 100%; padding: 12px; background: #3f6b4f; color: #fff; border: 0; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+  .error { color: #b3261e; margin-top: 12px; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>Welcome to Cuppify</h1>
+    <p class="sub">Enter your details to see the menu.</p>
+    <form method="post">
+      {% csrf_token %}
+      <label for="name">Your name</label>
+      <input id="name" name="name" type="text" required>
+      <label for="phone">Phone number</label>
+      <input id="phone" name="phone" type="tel" maxlength="10" required>
+      {% if error %}<div class="error">{{ error }}</div>{% endif %}
+      <button type="submit">Continue</button>
+    </form>
+  </div>
+</body>
+</html>
