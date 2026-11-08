@@ -29,3 +29,9 @@ A full-stack cafe management web application built with Django and deployed onli
 5. Configured the database [and ran `python manage.py migrate`].
 6. Mapped `/static/` to the collected static files folder (`python manage.py collectstatic`).
 7. Reloaded the web app from the Web tab.
+
+
+<img width="1360" height="768" alt="image" src="https://github.com/user-attachments/assets/7699fb3c-f4e2-4027-a61b-e4adaf172d07" />
+<img width="1360" height="768" alt="image" src="https://github.com/user-attachments/assets/04ac4094-f9db-4aca-b786-38e78a9183d4" />
+
+
