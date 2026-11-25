@@ -2,7 +2,7 @@
 
 A full-stack cafe management web application built with Django and deployed online on PythonAnywhere. Customers enter their details and place orders from the menu, and the cafe admin manages products and orders from a dedicated admin panel.
 
-[!Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Site-brightgreen?style=for-the-badge&logo=python)](https://manoj09.pythonanywhere.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Site-brightgreen?style=for-the-badge&logo=python)](https://manoj09.pythonanywhere.com)
 
 ## Features
 - Customer entry screen (name and phone number)
